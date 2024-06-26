@@ -1,4 +1,10 @@
-本文章简要介绍GUN Tools
+---
+layout: post
+
+title: GUN Tools
+typora-root-url: ..
+---
+本文章简要介绍GUN  Tools
 
 ## 概述
 
@@ -1212,6 +1218,3 @@ riscv64-unknown-elf-addr2line.exe  -f  -p -a  000222 -e .\main
   -h --help                 Display this information
   -v -V --version           Print the program's version number
 ```
-
-
-
