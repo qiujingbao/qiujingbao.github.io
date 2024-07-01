@@ -317,6 +317,128 @@ int old_fn ();
 int (*fn_ptr)() = old_fn;
 ```
 
+##### weak
+
+`weak` 属性在C/C++中用于将外部符号声明为弱符号，而不是全局符号。
+
+​	**将符号声明为弱符号**，与弱符号相对应的是强符号。
+
+​	除非声明为弱符号，那么默认就是强符号。有的地方说未初始化的符号为弱符号，如下所示，也是个全局符号而不是弱符号。
+
+```
+double pi;
+
+riscv64-unknown-elf-gcc -c week.c  -o main
+riscv64-unknown-elf-readelf --syms main   
+  Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS week.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    2 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     7: 0000000000000008     8 OBJECT  GLOBAL DEFAULT  COM pi
+```
+
+​	连接器发现同时存在弱符号和强符号，有限选择强符号，如果发现不存在强符号，只存在弱符号，则选择弱符号。如果都不存在：静态链接，恭喜，编译时报错，动态链接：对不起，系统无法启动。
+
+​	如下代码：执行会发生什么？编译报错，输出10，输出11？
+
+```
+#include <stdio.h>
+__attribute__((weak)) int res=10;
+int res=11;
+
+int main(){
+    printf("%d \n",res);
+}
+```
+
+​	如果说这种全局变量不能用weak修饰，那么如下代码输出什么？
+
+```
+#include <stdio.h>
+__attribute__((weak)) void fun(){
+    printf("10");
+}
+void fun(){
+    printf("10");
+}
+int main(){
+    fun();
+}
+```
+
+​	实际上weak针对的是符号，而全局变量是符号的一种。
+
+​	那为什么上述代码不work？weak将符号声明为WEAK，是在链接时起作用。如下所示。
+
+```
+static int add(int a,int b){
+    int no_static=10;
+    static int static_var=11;
+    return a+b;
+}
+int sub(int a,int b){
+    int no_static=10;
+    static int static_var=11;
+    add(no_static, static_var);
+    return a-b;
+}
+__attribute__((weak)) int max(int a,int b){
+    return a*b;
+}
+__attribute__((weak)) double pi = 3.14;
+static int res=0;
+int t_res=0;
+
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS add.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000    46 FUNC    LOCAL  DEFAULT    1 add
+     6: 000000000000000c     4 OBJECT  LOCAL  DEFAULT    5 static_var.1559
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     8: 0000000000000000     4 OBJECT  LOCAL  DEFAULT    4 res
+     9: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+    10: 0000000000000008     4 OBJECT  LOCAL  DEFAULT    5 static_var.1553
+    11: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+    12: 0000000000000000     0 SECTION LOCAL  DEFAULT    8 
+    13: 000000000000002e    76 FUNC    GLOBAL DEFAULT    1 sub
+    14: 000000000000007a    42 FUNC    WEAK   DEFAULT    1 max
+    15: 0000000000000000     8 OBJECT  WEAK   DEFAULT    5 pi
+    16: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    6 t_res
+
+#include <stdio.h>
+double pi = 3.1415926;
+int max(int a,int b){
+    return a*b*pi;
+}
+int main(){
+    printf("%d \n",max(1,1));
+}
+
+riscv64-unknown-elf-gcc -c add.c -o libadd.o
+riscv64-unknown-elf-gcc week.c -L. -o main
+```
+
+​	如果仅仅在一个翻译单元中使用weak那么将会出现重定义的错误，归根到底是weak是给linker看到的。
+
+https://refspecs.linuxfoundation.org/elf/elf.pdf
+
+##### weakref
+
+​	`weakref` 属性用于标记一个声明为弱引用（weak reference）。弱引用是一个别名，它本身不需要对目标符号进行定义。如果目标符号只通过弱引用进行引用，那么它就会成为一个弱未定义符号（weak undefined symbol）。如果直接引用了目标符号，那么强引用会优先，此时需要对目标符号进行定义，但不一定需要在同一翻译单元中。
+
+​	如果声明的弱引用与具名目标相关联，则该声明必须是 `static` 的。
+
+​	`weakref` 属性允许在C语言中创建一个不需要自身定义的别名，而是引用另一个已定义的符号。这对于在库或模块设计中具有灵活性和可替换性的需求特别有用。
+
+https://www.cnblogs.com/downey-blog/p/10470674.html
+
 ##### **unused**
 
 This attribute, attached to a function, means that the function is meant to be possibly unused. GCC does not produce a warning for this function.
@@ -415,27 +537,7 @@ v:   16;  v_:   16; v__:     16
 
 即使函数声明为 `noinline`，仍然可能有一些优化会导致对没有副作用的函数调用进行优化，使其不被保留在生成的代码中。这种情况下，可以在函数内部使用 `asm ("");` 语句来创建一个特殊的副作用，以确保调用不会被优化掉。
 
-##### **weak**
-
-`weak` 属性在C/C++中用于将外部符号声明为弱符号，而不是全局符号。让我们详细解释一下这个概念和它的用法：
-
-**将符号声明为弱符号**，与弱符号相对应的是强符号。
-
-​	**强符号**是指在程序中定义并且有确定地址的符号。一般情况下，有初始值的全局变量和非静态函数都是强符号。
-
-​	**弱符号**是指在程序中定义，但其地址可以被其他同名符号覆盖的符号。
-
-​	连接器发现同时存在弱符号和强符号，有限选择强符号，如果发现不存在强符号，只存在弱符号，则选择弱符号。如果都不存在：静态链接，恭喜，编译时报错，动态链接：对不起，系统无法启动。
-
-##### weakref
-
-​	`weakref` 属性用于标记一个声明为弱引用（weak reference）。弱引用是一个别名，它本身不需要对目标符号进行定义。如果目标符号只通过弱引用进行引用，那么它就会成为一个弱未定义符号（weak undefined symbol）。如果直接引用了目标符号，那么强引用会优先，此时需要对目标符号进行定义，但不一定需要在同一翻译单元中。
-
-​	如果声明的弱引用与具名目标相关联，则该声明必须是 `static` 的。
-
-​	`weakref` 属性允许在C语言中创建一个不需要自身定义的别名，而是引用另一个已定义的符号。这对于在库或模块设计中具有灵活性和可替换性的需求特别有用。
-
-##### `const`
+##### const
 
 - 功能
 
