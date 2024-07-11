@@ -166,7 +166,7 @@ foo
 
 定义三个宏 `foo`, `bar`, `baz`，展开过程如下图所示：
 
-[![obj_like_recur.png](../assets/pics/thb_obj_like_recur.png)]()
+![thb_obj_like_recur](../assets/pics/thb_obj_like_recur.png)
 
 展开步骤为：
 
@@ -179,7 +179,7 @@ foo
 
 例子与图片来自：
 
-https://feng.zone/2017/05/18/%E5%AE%8F%E5%AE%9A%E4%B9%89%E9%BB%91%E9%AD%94%E6%B3%95-%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%A5%87%E6%8A%80%E6%B7%AB%E5%B7%A7-2/
+https://feng.zone
 
 ##### function-macro展开
 
@@ -196,9 +196,7 @@ https://feng.zone/2017/05/18/%E5%AE%8F%E5%AE%9A%E4%B9%89%E9%BB%91%E9%AD%94%E6%B3
 1. 如果一个 func-like 的宏的宏名后边没有参数列表（括号和 identifier-list）那么这个宏名将不被视作一个宏。 #define func() xxxx
 2. 每次展开结束以后会向后看一个 token 是否能够与上次展开的结果形成一个 func-like 的宏。如果有就展开这个新形成的宏。
 
-例子如下：
-
-https://feng.zone/2017/05/20/%E5%AE%8F%E5%AE%9A%E4%B9%89%E9%BB%91%E9%AD%94%E6%B3%95-%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%A5%87%E6%8A%80%E6%B7%AB%E5%B7%A7-3/
+例子如下：[链接](https://feng.zone/2017/05/20/%E5%AE%8F%E5%AE%9A%E4%B9%89%E9%BB%91%E9%AD%94%E6%B3%95-%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%A5%87%E6%8A%80%E6%B7%AB%E5%B7%A7-3/)
 
 如下是关键：1.参数先展开。2. 替换后重扫描。3. 蓝色集合中不展开。4. `#`, `##` 不展开。 5. 最后的括号要检查。
 
@@ -1472,4 +1470,3 @@ int driver_register(struct device_driver *drv)
 }
 EXPORT_SYMBOL_GPL(driver_register);
 ```
-
