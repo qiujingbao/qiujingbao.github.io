@@ -164,9 +164,9 @@ https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html
 foo
 ```
 
-定义三个宏 `foo`, `bar`, `baz`，展开过程如下图所示：
-
 ![thb_obj_like_recur](../assets/pics/thb_obj_like_recur.png)
+
+定义三个宏 `foo`, `bar`, `baz`，展开过程如上图所示：
 
 展开步骤为：
 
