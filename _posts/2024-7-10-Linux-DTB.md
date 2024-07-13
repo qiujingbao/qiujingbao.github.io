@@ -1,3 +1,10 @@
+---
+layout: post
+
+title: 设备树
+typora-root-url: ..
+---
+
 ## DTB加载过程
 
 ##### 涉及文件
@@ -445,6 +452,10 @@ setup_arch()
    |    在执行完unflatten_device_tree()后，DTS节点信息被解析出来，保存到allnodes链表中，allnodes在后面会被用到
    |
 ```
+
+![img](./assets/pics/o_211223063913_dts_probe-20240712191318434.jpg)
+
+https://www.cnblogs.com/lyndonlu/articles/15723743.html
 
 ####  总结
 

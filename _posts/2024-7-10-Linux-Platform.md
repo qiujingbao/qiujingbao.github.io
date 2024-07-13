@@ -1,3 +1,10 @@
+---
+layout: post
+
+title: Linux Kernel Platform总线
+typora-root-url: ..
+---
+
 ## platform总线
 
 ​	上述也说很少直接使用device与driver，下面是platform包装的。

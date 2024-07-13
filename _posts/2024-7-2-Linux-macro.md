@@ -1,3 +1,10 @@
+---
+layout: post
+
+title: Kernel Macro
+typora-root-url: ..
+---
+
 ## Linux Macro
 
 ### 基本知识

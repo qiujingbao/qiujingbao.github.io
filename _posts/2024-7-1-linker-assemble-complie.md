@@ -1,3 +1,9 @@
+---
+layout: post
+
+title: 链接与汇编
+typora-root-url: ..
+---
 ##### 符号 and Symbol Table
 
 

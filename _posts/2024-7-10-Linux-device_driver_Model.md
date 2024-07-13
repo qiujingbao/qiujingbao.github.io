@@ -1,3 +1,10 @@
+---
+layout: post
+
+title: Linux Kernel 统一设备模型
+typora-root-url: ..
+---
+
 ## Linux Kernel 统一设备模型
 
 #### 介绍
@@ -551,6 +558,16 @@ void __init driver_init(void)
 }
 
 ```
+
+
+
+#### 详细流程
+
+![img](./assets/pics/o_211223063913_dts_probe.jpg)
+
+
+
+ref：https://www.cnblogs.com/lyndonlu/articles/15723743.html
 
 #### **设备模型框架下驱动开发的基本步骤**
 

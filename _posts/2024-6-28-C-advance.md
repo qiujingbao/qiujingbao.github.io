@@ -1,3 +1,9 @@
+---
+layout: post
+
+title: C扩展
+typora-root-url: ..
+---
 ## 存储对象
 
 ​	在计算机的视角，只有两种东西，指令和数据。
