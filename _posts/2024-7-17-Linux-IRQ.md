@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Linux Kernel IRQ
-categories: [Linux,IRQ]
+categories: [Linux,Kernel]
 tags: [Linux,Kernel,IRQ]
 typora-root-url: ..
 ---

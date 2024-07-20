@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Linux Platform 总线
-categories: [Linux,Platform]
+categories: [Linux,driver]
 tags: [Linux,Kernel,bus]
 typora-root-url: ..
 ---
