@@ -2,6 +2,8 @@
 layout: post
 
 title: Kernel Macro
+categories: [Linux,Kernel]
+tags: [Linux,Kernel]
 typora-root-url: ..
 ---
 

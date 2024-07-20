@@ -1,3 +1,12 @@
+---
+layout: post
+title: Linux Kernel IRQ
+categories: [Linux,IRQ]
+tags: [Linux,Kernel,IRQ]
+typora-root-url: ..
+---
+
+
 ## Linux Kernel IRQ interrupt request 
 
 

@@ -2,6 +2,8 @@
 layout: post
 
 title: C扩展
+categories: [C]
+tags: [C]
 typora-root-url: ..
 ---
 ## 存储对象

@@ -2,6 +2,8 @@
 layout: post
 
 title: GUN Tools
+categories: [C,Tools]
+tags: [C,Tools]
 typora-root-url: ..
 ---
 本文章简要介绍GUN  Tools

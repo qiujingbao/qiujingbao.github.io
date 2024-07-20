@@ -1,3 +1,12 @@
+---
+layout: post
+title: Linux Platform 总线
+categories: [Linux,Platform]
+tags: [Linux,Kernel,bus]
+typora-root-url: ..
+---
+
+
 ### 介绍
 
 ​	以前的文章介绍了platform deivce driver model。但是只是介绍了这个模型本身所蕴含的东西。kernel在涉及这个模型的时候加入了其他很多的扩展。

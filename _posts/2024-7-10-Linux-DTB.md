@@ -2,6 +2,8 @@
 layout: post
 
 title: 设备树
+categories: [Linux,DTS]
+tags: [Linux,DTS]
 typora-root-url: ..
 ---
 

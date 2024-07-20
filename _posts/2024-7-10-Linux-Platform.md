@@ -2,6 +2,8 @@
 layout: post
 
 title: Linux Kernel Platform总线
+categories: [Linux,Kernel]
+tags: [Linux,Kernel,Platform]
 typora-root-url: ..
 ---
 
