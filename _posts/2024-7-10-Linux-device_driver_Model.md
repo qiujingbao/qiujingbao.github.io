@@ -1,9 +1,8 @@
 ---
 layout: post
-
 title: Linux Kernel 统一设备模型
-categories: [Linux,driver]
-tags: [Linux,Kernel,platform]
+categories: [Linux,Driver]
+tags: [Linux,Driver,platform]
 typora-root-url: ..
 ---
 

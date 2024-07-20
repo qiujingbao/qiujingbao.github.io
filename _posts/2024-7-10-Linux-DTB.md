@@ -1,8 +1,7 @@
 ---
 layout: post
-
 title: 设备树
-categories: [Linux,driver]
+categories: [Linux,Driver]
 tags: [Linux,DTS]
 typora-root-url: ..
 ---

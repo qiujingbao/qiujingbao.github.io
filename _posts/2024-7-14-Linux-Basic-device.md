@@ -1,11 +1,10 @@
 ---
 layout: post
 title: Linux Platform 总线
-categories: [Linux,driver]
+categories: [Linux,Driver]
 tags: [Linux,Kernel,bus]
 typora-root-url: ..
 ---
-
 
 ### 介绍
 
