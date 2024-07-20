@@ -1,9 +1,9 @@
 ---
 layout: post
 
-title: 链接与汇编
-categories: [C,链接与汇编]
-tags: [C,BASIC]
+title: 链接
+categories: [C]
+tags: [C,linker]
 typora-root-url: ..
 ---
 ##### 符号 and Symbol Table
