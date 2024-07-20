@@ -1,7 +1,7 @@
 ---
 layout: post
 
-title: Linux-Lock
+title: Linux Kernel Lock
 categories: [Linux,Kernel]
 tags: [Linux,Kernel,OS,Lock]
 typora-root-url: ..

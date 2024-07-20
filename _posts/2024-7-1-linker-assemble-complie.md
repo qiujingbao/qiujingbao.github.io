@@ -2,7 +2,7 @@
 layout: post
 
 title: 链接与汇编
-categories: [C,BASIC]
+categories: [C,链接与汇编]
 tags: [C,BASIC]
 typora-root-url: ..
 ---

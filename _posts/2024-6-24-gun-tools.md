@@ -2,7 +2,7 @@
 layout: post
 
 title: GUN Tools
-categories: [C,Tools]
+categories: [C]
 tags: [C,Tools]
 typora-root-url: ..
 ---
