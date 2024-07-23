@@ -9,8 +9,6 @@ typora-root-url: ..
 
 ## Linux-锁的实现
 
-
-
 概念：事实上，同步原语是一种软件机制，提供了两个或者多个[并行](https://en.wikipedia.org/wiki/Parallel_computing)进程或者线程在不同时刻执行一段相同的代码段的能力。
 
 ### 自旋锁
