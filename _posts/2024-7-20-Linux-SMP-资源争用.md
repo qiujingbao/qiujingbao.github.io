@@ -211,7 +211,7 @@ Q = READ_ONCE(P); smp_read_barrier_depends(); D = READ_ONCE(*Q);
 Q = LOAD P, D = LOAD *Q
 ```
 
-smp_read_barrier_depends() 只在 DEC Alpha 中有用，READ_ONCE 的作用在 [这里](http://quant67.com/post/linux/access_once.html) 提到。
+smp_read_barrier_depends() 只在 DEC Alpha 中有用，READ_ONCE 的作用在 [这里](https://quant67.com/post/linux/access_once.html) 提到。
 
 1. 在一个 CPU 中的覆盖 load-store 操作是有顺序的。比如
 
