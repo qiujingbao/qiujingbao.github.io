@@ -76,7 +76,7 @@ struct __raw_tickets {
 
 **获取锁**
 
-​	获取锁的行为就是原子的增加next值，然后作为自己的ticket，拿着自己的ticket一直和owner做对比，看看是不是轮到自己拿锁。
+​	获取锁的行为就是原子的增加next值，然后作为自己的ticket，拿着自己的ticket一直和owner做对比，看看是不是轮到自己拿锁。也就是共享这个变量，另外保存一个ticket值。
 
 **释放锁**
 
@@ -186,7 +186,7 @@ struct qnode {
 static DEFINE_PER_CPU_ALIGNED(struct qnode, qnodes[MAX_NODES]);
 ```
 
-对于每个CPU都有一个qnode数组，此数组有4个。qnode就是mcs锁的结构体。使用CPU编号和节点编号就可以确定唯一一个MCS结构体。所以如图所示。
+对于每个CPU都有一个qnode数组，此数组大小为4个。qnode就是mcs锁的结构体。使用CPU编号和节点编号就可以确定唯一一个MCS结构体。所以如图所示。
 
 ![img](./assets/pics/202406072314393.png)
 
