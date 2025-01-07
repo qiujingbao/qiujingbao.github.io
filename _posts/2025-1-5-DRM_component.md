@@ -2,8 +2,8 @@
 layout: post
 
 title: component
-categories: [component]
-tags: [component]
+categories: [DRM]
+tags: [DRM,component]
 typora-root-url: ..
 ---
 
