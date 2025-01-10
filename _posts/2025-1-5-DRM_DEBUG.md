@@ -16,6 +16,10 @@ https://blog.csdn.net/czg13548930186/article/details/131132700
 
 ## 驱动加载过程
 
+![CleanShot 2025-01-10 at 17.32.07](./assets/pics/CleanShot%202025-01-10%20at%2017.32.07.png)
+
+如图，是这个驱动加载的整个过程，请先看一眼，下面如果有疑问对于该过程请回头看此图。
+
 回到梦开始的地方，一个platform总线上的驱动的声明。
 
 ```
@@ -604,6 +608,8 @@ static int rockchip_drm_create_properties(struct drm_device *dev)
 
 ![CleanShot 2025-01-09 at 15.12.20](./assets/pics/CleanShot%202025-01-09%20at%2015.12.20.png)
 
+## vop
+
 ### vop2_bind
 
 ![CleanShot 2025-01-09 at 15.28.04](./assets/pics/CleanShot%202025-01-09%20at%2015.28.04.png)
@@ -874,10 +880,24 @@ static const struct vop2_win_data rk3568_vop_win_data[] = {
 			u32 vp_id = 0;
 	/* 这几个存疑，因为目前我用的代码并没有这个属性 */
 	/* 网上说arch/arm64/boot/dts/rockchip/rk3588-evb.dtsi 文件里面存在但是没有找到 */
+	/*
+	但是在运行时如下文件夹内存在 
+	root@linaro-alip:/proc/device-tree/vop@fe040000/ports/port@0# ls
+'#address-cells'   endpoint@1   name      rockchip,plane-mask
+ cursor-win-id     endpoint@2   phandle   rockchip,primary-plane
+ endpoint@0        endpoint@3   reg      '#size-cells'
+ 使用hexdump rockchip,plane-mask
+	0000000 0000 2a00                              
+0000004
+	使用hexdump
+	0000000 0000 0500                              
+0000004
+	*/
+	
 			of_property_read_u32(child, "rockchip,plane-mask", &plane_mask);
 			of_property_read_u32(child, "rockchip,primary-plane", &primary_plane_phy_id);
 			of_property_read_u32(child, "reg", &vp_id);
-/* 这个vps是video port */
+/* 这个vps是 video port 有个文档称为 Video Output Processor */
 			vop2->vps[vp_id].plane_mask = plane_mask;
 			if (plane_mask)
 				vop2->vps[vp_id].primary_plane_phy_id = primary_plane_phy_id;
@@ -1144,6 +1164,7 @@ static inline unsigned int drm_crtc_index(const struct drm_crtc *crtc)
 	 * "possible_crtcs" to the newly initialized crtc.
 	 
 	 首先为每个crTC创建主平面，因为我们需要将它们传递给spel_crTC_init_with_planes，它将“possible_crtcs”设置为新初始化的crTC。
+	 上文说了vps 是 video ports ，是crtc对应的硬件，所以为每个vps创建crtc
 	 */
 	for (i = 0; i < vop2_data->nr_vps; i++) {
 		vp_data = &vop2_data->vp[i];
@@ -1335,3 +1356,192 @@ static inline unsigned int drm_crtc_index(const struct drm_crtc *crtc)
 
 ```
 
+##### **2.1 变量初始化**
+
+- `vop2_data`：包含 VOP2 硬件的描述信息（如支持的 VP 数量）。
+- `possible_crtcs`：表示哪些 CRTC 可以与 Plane 关联，初始值是支持所有 VP 的位掩码。
+- `bootloader_initialized`：检查 Bootloader 是否已经初始化了 VOP 的 `plane_mask`。
+
+##### **2.2 检查 Bootloader 初始化状态**
+
+```
+c
+
+
+复制代码
+for (i = 0; i < vop2_data->nr_vps; i++) {
+    vp = &vop2->vps[i];
+    if (vp->plane_mask) {
+        bootloader_initialized = true;
+        break;
+    }
+}
+```
+
+- 如果 `plane_mask` 全为零，说明 Bootloader 没有初始化 VOP，内核需要手动初始化。
+
+------
+
+##### **2.3 为每个 VP 创建 Primary Plane 和 CRTC**
+
+```
+c
+
+
+复制代码
+for (i = 0; i < vop2_data->nr_vps; i++) {
+    vp = &vop2->vps[i];
+    ...
+    if (!vp->plane_mask && bootloader_initialized)
+        continue; // 跳过未初始化的 VP
+```
+
+- 遍历每个 VP，为其创建 Primary Plane 和 CRTC。
+- 如果 `plane_mask` 为零且 Bootloader 已初始化，则跳过该 VP。
+
+##### **Primary Plane 的分配**
+
+```
+c
+
+
+复制代码
+if (vp->primary_plane_phy_id >= 0) {
+    win = vop2_find_win_by_phys_id(vop2, vp->primary_plane_phy_id);
+    if (win) {
+        find_primary_plane = true;
+        win->type = DRM_PLANE_TYPE_PRIMARY;
+    }
+} else {
+    while (j < vop2->registered_num_wins) {
+        ...
+        if (win->type != DRM_PLANE_TYPE_PRIMARY)
+            continue;
+
+        find_primary_plane = true;
+        break;
+    }
+}
+```
+
+- 如果 `primary_plane_phy_id` 有效，则直接分配对应的窗口（Window）。
+- 否则，从未被分配的窗口中查找一个作为 Primary Plane。
+
+##### **初始化 Primary Plane**
+
+```
+c
+
+
+复制代码
+if (vop2_plane_init(vop2, win, possible_crtcs)) {
+    DRM_DEV_ERROR(vop2->dev, "failed to init primary plane\n");
+    break;
+}
+```
+
+- 调用 `vop2_plane_init` 初始化 Primary Plane。
+- 如果失败，记录错误并退出。
+
+##### **创建 Cursor Plane**
+
+```
+c
+
+
+复制代码
+if (vp->cursor_win_id >= 0) {
+    cursor = vop2_cursor_plane_init(vp, possible_crtcs);
+    if (!cursor)
+        DRM_WARN("failed to init cursor plane for vp%d\n", vp->id);
+}
+```
+
+- 如果 `cursor_win_id` 有效，则为 VP 创建 Cursor Plane。
+- Cursor Plane 是一个特殊的图层，用于显示鼠标指针或其他小型图像。
+
+##### **创建 CRTC**
+
+```
+c
+
+
+复制代码
+ret = drm_crtc_init_with_planes(drm_dev, crtc, plane, cursor, &vop2_crtc_funcs,
+                                "video_port%d", vp->id);
+```
+
+- 调用 DRM 框架的 `drm_crtc_init_with_planes`，将 Primary Plane 和 Cursor Plane 绑定到 CRTC。
+- 设置 CRTC 的名称（如 `video_port0`）。
+
+------
+
+##### **2.4 剩余窗口的分配**
+
+```
+c
+
+
+复制代码
+for (j = 0; j < vop2->registered_num_wins; j++) {
+    win = &vop2->win[j];
+    ...
+    if (win->type == DRM_PLANE_TYPE_PRIMARY &&
+        !be_used_for_primary_plane)
+        win->type = DRM_PLANE_TYPE_OVERLAY;
+}
+```
+
+- 将未分配的 Primary Plane 转换为 Overlay Plane。
+- Overlay Plane 是一种辅助图层，用于显示叠加内容。
+
+------
+
+##### **2.5 创建 Overlay Plane**
+
+```
+c
+
+
+复制代码
+for (j = 0; j < vop2->registered_num_wins; j++) {
+    win = &vop2->win[j];
+
+    if (win->type != DRM_PLANE_TYPE_OVERLAY)
+        continue;
+
+    ret = vop2_plane_init(vop2, win, possible_crtcs);
+    if (ret)
+        DRM_WARN("failed to init overlay plane %s\n", win->name);
+}
+```
+
+- 遍历所有剩余的窗口，为 Overlay Plane 创建 DRM 对象。
+
+
+
+这一部分同样可以把何小龙大佬的图放上，明确目前代码的位置。
+
+![在这里插入图片描述](./assets/pics/6bd2e8d60e47903494494177e56938d4-6501159.png)
+
+和rockchip的如下图，可以更清楚的展示。
+
+![CleanShot 2025-01-10 at 17.29.56](./assets/pics/CleanShot%202025-01-10%20at%2017.29.56.png)
+
+![CleanShot 2025-01-10 at 17.30.14](./assets/pics/CleanShot%202025-01-10%20at%2017.30.14.png)
+
+![CleanShot 2025-01-10 at 17.31.17](./assets/pics/CleanShot%202025-01-10%20at%2017.31.17.png)
+
+
+
+## VOP FUN/操作
+
+TODO
+
+
+
+## MIPI DSI
+
+根据上图，可以看到vop这个硬件对应的软件描述已经在vop_xxx中描述了，那么VOP的下层就是各种各样的现实接口比如MIPI DSI，所以kms的encoder与connector需要这里描述，然后交给panel显示。
+
+TODO
