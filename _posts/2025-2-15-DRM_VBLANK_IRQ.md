@@ -1,3 +1,12 @@
+---
+layout: post
+
+title: DRM-VBLANK
+categories: [DRM]
+tags: [DRM,VBLANK]
+typora-root-url: ..
+---
+
 ## irq
 
 这个文件提供了三个函数
